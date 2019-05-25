@@ -1,6 +1,8 @@
 import chainer
 import chainer.functions as F
 import chainer.links as L
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class ReflectionRemovalNet(chainer.Chain):
@@ -8,39 +10,79 @@ class ReflectionRemovalNet(chainer.Chain):
         super(ReflectionRemovalNet, self).__init__()
         self.lambda_variable = lambda_variable
         with self.init_scope():
-            self.conv1 = L.Convolution2D(None, 64, 64, stride=1, pad=1)
-            self.conv2 = L.Convolution2D(None, 64, 64, stride=1, pad=1)
-            self.conv3 = L.Convolution2D(None, 128, 64, stride=1, pad=1)
-            self.conv4 = L.Convolution2D(None, 128, 64, stride=1, pad=1)
-            self.conv5 = L.Convolution2D(None, 256, 64, stride=1, pad=1)
-            self.conv6 = L.Convolution2D(None, 256, 64, stride=1, pad=1)
+            self.conv1 = L.Convolution2D(None, 32, ksize=(5, 5), stride=1, pad=0)
+            self.conv2 = L.Convolution2D(None, 64, ksize=(5, 5), stride=1, pad=0)
+            self.conv3 = L.Convolution2D(None, 128, ksize=(5, 5), stride=1, pad=0)
+            self.conv4 = L.Convolution2D(None, 64, ksize=(5, 5), stride=1, pad=0)
+            self.conv5 = L.Convolution2D(None, 32, ksize=(5, 5), stride=1, pad=0)
+            self.conv6 = L.Convolution2D(None, 3, ksize=(5, 5), stride=1, pad=0)
 
-            self.conv7 = L.Convolution2D(None, 256, 64, stride=1, pad=1)
-            self.conv8 = L.Convolution2D(None, 512, 64, stride=1, pad=1)
-            self.conv9 = L.Convolution2D(None, 512, 64, stride=1, pad=1)
-            self.conv10 = L.Convolution2D(None, 512, 64, stride=1, pad=1)
-            self.conv11 = L.Convolution2D(None, 512, 64, stride=1, pad=1)
-            self.conv12 = L.Convolution2D(None, 512, 64, stride=1, pad=1)
+            self.bn1 = L.BatchNormalization(32)
+            self.bn2 = L.BatchNormalization(64)
+            self.bn3 = L.BatchNormalization(128)
+            self.bn4 = L.BatchNormalization(256)
+            self.bn5 = L.BatchNormalization(512)
+            self.bn6 = L.BatchNormalization(512)
+            self.bn7 = L.BatchNormalization(512)
+            self.bn8 = L.BatchNormalization(512)
+            self.bn9 = L.BatchNormalization(512)
+            self.bn10 = L.BatchNormalization(512)
+            self.bn11 = L.BatchNormalization(512)
+            self.bn12 = L.BatchNormalization(512)
+            self.bn13 = L.BatchNormalization(512)
+            self.bn14 = L.BatchNormalization(512)
+            self.bn15 = L.BatchNormalization(512)
+            self.bn16 = L.BatchNormalization(512)
+            self.bn17 = L.BatchNormalization(512)
+            self.bn18 = L.BatchNormalization(512)
+            self.bn19 = L.BatchNormalization(512)
+            self.bn20 = L.BatchNormalization(256)
+            self.bn21 = L.BatchNormalization(128)
+            self.bn22 = L.BatchNormalization(64)
+            self.bn23 = L.BatchNormalization(32)
+            self.bn24 = L.BatchNormalization(3)
 
-            self.deconv1 = L.Deconvolution2D(None, 512, 64, stride=2, pad=1)
-            self.deconv2 = L.Deconvolution2D(None, 256, 64, stride=2, pad=1)
-            self.deconv3 = L.Deconvolution2D(None, 128, 64, stride=2, pad=1)
-            self.deconv4 = L.Deconvolution2D(None, 64, 64, stride=3, pad=1)
-            self.deconv5 = L.Deconvolution2D(None, 1, 64, stride=2, pad=1)
-            self.deconv6 = L.Deconvolution2D(None, 128, 64, stride=2, pad=1)
-            self.deconv7 = L.Deconvolution2D(None, 64, 64, stride=2, pad=1)
-            self.deconv8 = L.Deconvolution2D(None, 1, 64, stride=3, pad=1)
-            self.deconv9 = L.Deconvolution2D(None, 256, 64, stride=2, pad=1)
-            self.deconv10 = L.Deconvolution2D(None, 128, 64, stride=2, pad=1)
-            self.deconv11 = L.Deconvolution2D(None, 64, 64, stride=2, pad=1)
-            self.deconv12 = L.Deconvolution2D(None, 1, 64, stride=3, pad=1)
+            self.conv7 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv8 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv8_skip = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+
+            self.conv9 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv10 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv10_skip = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv11 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.conv12 = L.Convolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+
+            self.deconv1 = L.Deconvolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.deconv2 = L.Deconvolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.deconv3 = L.Deconvolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.deconv4 = L.Deconvolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.deconv5 = L.Deconvolution2D(None, 512, ksize=(5, 5), stride=1, pad=0)
+            self.deconv6 = L.Deconvolution2D(None, 3, ksize=(5, 5), stride=1, pad=0)
+            self.deconv7 = L.Deconvolution2D(None, 32, ksize=(5, 5), stride=1, pad=0)
+            self.deconv8 = L.Deconvolution2D(None, 64, ksize=(5, 5), stride=1, pad=0)
+            self.deconv9 = L.Deconvolution2D(None, 128, ksize=(5, 5), stride=1, pad=0)
+            self.deconv10 = L.Deconvolution2D(None, 64, ksize=(5, 5), stride=1, pad=0)
+            self.deconv11 = L.Deconvolution2D(None, 32, ksize=(5, 5), stride=1, pad=0)
+            self.deconv12 = L.Deconvolution2D(None, 3, ksize=(5, 5), stride=1, pad=0)
 
     def __call__(self, input_img, target_img):
         predicted_transmission_img = self.forward(input_img)
+        if np.random.random() < 0.1:
+            fig = plt.figure(figsize=(10, 10))
+            ax1 = fig.add_subplot(3, 3, 1)
+            ax1.imshow(chainer.cuda.to_cpu(input_img[0].transpose(2, 1, 0) * 255).astype(np.uint8)[:, :, ::-1])
+            ax2 = fig.add_subplot(3, 3, 2)
+            ax2.imshow(chainer.cuda.to_cpu(predicted_transmission_img.data[0].transpose(
+                2, 1, 0) * 255).astype(np.uint8)[:, :, ::-1])
+            ax3 = fig.add_subplot(3, 3, 3)
+            ax3.imshow(chainer.cuda.to_cpu(target_img[0].transpose(2, 1, 0) * 255).astype(np.uint8)[:, :, ::-1])
+            plt.show()
 
         l2_loss = F.mean_squared_error(predicted_transmission_img, target_img)
+        #l2_loss = F.mean_absolute_error(predicted_transmission_img, target_img)
 
         # VGG loss: VGG19を特徴抽出器として用いて、予測された透過画像と目的の透過画像から特徴を抽出した特徴空間上のMSEをlossに採用
+        """
         vgg19 = L.VGG19Layers()
         extract_layers = ['conv1_2', 'conv2_2', 'conv3_4', 'conv4_4', 'conv5_4']
         predicted_transmission_img_on_vgg19_results = vgg19.extract(predicted_transmission_img, layers=extract_layers)
@@ -54,53 +96,105 @@ class ReflectionRemovalNet(chainer.Chain):
             vgg_loss += F.mean_squared_error(phi_F, phi_aT) / (phi_F.shape[2] * phi_F.shape[3])
 
         loss = l2_loss + (self.lambda_variable * vgg_loss)
+        """
+        loss = l2_loss
+        chainer.report({'loss': loss}, self)
 
         return loss
 
     def feature_extraction(self, img):
         feature = self.conv1(img)
+        feature = self.bn1(feature)
+        feature = F.relu(feature)
         feature = self.conv2(feature)
+        feature = self.bn2(feature)
+        feature = F.relu(feature)
         feature = self.conv3(feature)
+        feature = self.bn3(feature)
+        feature = F.relu(feature)
         feature = self.conv4(feature)
+        feature = self.bn4(feature)
+        feature = F.relu(feature)
         feature = self.conv5(feature)
+        feature = self.bn5(feature)
+        feature = F.relu(feature)
         feature = self.conv6(feature)
+        feature = self.bn6(feature)
         return feature
 
     def reflection_recovery_and_removal(self, feature):
         removal_feature1 = F.relu(feature)
         removal_feature1 = self.conv7(removal_feature1)
-        removal_feature1 = self.conv8(removal_feature1)
+        removal_feature1 = self.bn7(removal_feature1)
+        removal_feature1 = F.relu(removal_feature1)
+        #removal_feature1 = self.conv8(removal_feature1)
+        removal_feature2 = self.conv8(removal_feature1)
+        removal_feature2 = self.bn8(removal_feature2)
 
-        removal_feature2 = F.relu(removal_feature1)
+        #removal_feature2 = F.relu(removal_feature1)
+        removal_feature2 = F.relu(removal_feature2)
         removal_feature2 = self.conv9(removal_feature2)
-        removal_feature2 = self.conv10(removal_feature2)
+        removal_feature2 = self.bn9(removal_feature2)
+        removal_feature2 = F.relu(removal_feature2)
+        #removal_feature2 = self.conv10(removal_feature2)
+        removal_feature3 = self.conv10(removal_feature2)
+        removal_feature3 = self.bn10(removal_feature3)
 
-        removal_feature3 = F.relu(removal_feature2)
+        #removal_feature3 = F.relu(removal_feature2)
+        removal_feature3 = F.relu(removal_feature3)
         removal_feature3 = self.conv11(removal_feature3)
+        removal_feature3 = self.bn11(removal_feature3)
+        removal_feature3 = F.relu(removal_feature3)
         removal_feature3 = self.conv12(removal_feature3)
+        removal_feature3 = self.bn12(removal_feature3)
+        removal_feature3 = F.relu(removal_feature3)
         removal_feature3 = self.deconv1(removal_feature3)
+        removal_feature3 = self.bn13(removal_feature3)
+        removal_feature3 = F.relu(removal_feature3)
         removal_feature3 = self.deconv2(removal_feature3)
+        removal_feature3 = self.bn14(removal_feature3)
+        removal_feature3 = F.relu(removal_feature3)
 
-        removal_2_plus_3 = removal_feature2 + removal_feature3
+        removal_2_plus_3 = self.conv10_skip(removal_feature2) + removal_feature3
         removal_2_plus_3 = F.relu(removal_2_plus_3)
         removal_2_plus_3 = self.deconv3(removal_2_plus_3)
+        removal_2_plus_3 = self.bn15(removal_2_plus_3)
+        removal_2_plus_3 = F.relu(removal_2_plus_3)
         removal_2_plus_3 = self.deconv4(removal_2_plus_3)
+        removal_2_plus_3 = self.bn16(removal_2_plus_3)
+        removal_2_plus_3 = F.relu(removal_2_plus_3)
 
-        removal_1_plus_2_plus_3 = removal_feature1 + removal_2_plus_3
+        #removal_1_plus_2_plus_3 = removal_feature1 + removal_2_plus_3
+        removal_1_plus_2_plus_3 = self.conv8_skip(removal_feature1) + removal_2_plus_3
         removal_1_plus_2_plus_3 = F.relu(removal_1_plus_2_plus_3)
         removal_1_plus_2_plus_3 = self.deconv5(removal_1_plus_2_plus_3)
+        removal_1_plus_2_plus_3 = self.bn17(removal_1_plus_2_plus_3)
+        removal_1_plus_2_plus_3 = F.relu(removal_1_plus_2_plus_3)
         removal_1_plus_2_plus_3 = self.deconv6(removal_1_plus_2_plus_3)
+        removal_1_plus_2_plus_3 = self.bn18(removal_1_plus_2_plus_3)
+        removal_1_plus_2_plus_3 = F.relu(removal_1_plus_2_plus_3)
         return removal_1_plus_2_plus_3
 
     def transmission_layer(self, feature, removal_1_plus_2_plus_3):
-        diff_reflection = feature - removal_1_plus_2_plus_3
-        diff_reflection = F.relu(diff_reflection)
+        diff_reflection = F.relu(feature - removal_1_plus_2_plus_3)
         diff_reflection = self.deconv7(diff_reflection)
+        diff_reflection = self.bn19(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         diff_reflection = self.deconv8(diff_reflection)
+        diff_reflection = self.bn20(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         diff_reflection = self.deconv9(diff_reflection)
+        diff_reflection = self.bn21(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         diff_reflection = self.deconv10(diff_reflection)
+        diff_reflection = self.bn22(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         diff_reflection = self.deconv11(diff_reflection)
+        diff_reflection = self.bn23(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         diff_reflection = self.deconv12(diff_reflection)
+        diff_reflection = self.bn24(diff_reflection)
+        diff_reflection = F.relu(diff_reflection)
         return diff_reflection
 
     def forward(self, img):
