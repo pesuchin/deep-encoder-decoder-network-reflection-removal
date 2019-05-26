@@ -99,7 +99,7 @@ class ImagePairDataset(dataset_mixin.DatasetMixin):
 if __name__ == '__main__':
     iteration = 200000
     out_dir = './result/'
-    batchsize = 16
+    batchsize = 64
     gpu = 0
 
     snapshot_interval = (2000, 'iteration')
