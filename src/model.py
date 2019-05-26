@@ -69,24 +69,7 @@ class ReflectionRemovalNet(chainer.Chain):
         predicted_transmission_img = self.forward(input_img)
 
         l2_loss = F.mean_squared_error(predicted_transmission_img, target_img)
-        #l2_loss = F.mean_absolute_error(predicted_transmission_img, target_img)
 
-        # VGG loss: VGG19を特徴抽出器として用いて、予測された透過画像と目的の透過画像から特徴を抽出した特徴空間上のMSEをlossに採用
-        """
-        vgg19 = L.VGG19Layers()
-        extract_layers = ['conv1_2', 'conv2_2', 'conv3_4', 'conv4_4', 'conv5_4']
-        predicted_transmission_img_on_vgg19_results = vgg19.extract(predicted_transmission_img, layers=extract_layers)
-        target_img_on_vgg19_results = vgg19.extract(target_img, layers=extract_layers)
-
-        vgg_loss = 0
-        for extract_layer in extract_layers:
-            phi_F = predicted_transmission_img_on_vgg19_results[extract_layer]
-            phi_aT = target_img_on_vgg19_results[extract_layer]
-
-            vgg_loss += F.mean_squared_error(phi_F, phi_aT) / (phi_F.shape[2] * phi_F.shape[3])
-
-        loss = l2_loss + (self.lambda_variable * vgg_loss)
-        """
         loss = l2_loss
         chainer.report({'loss': loss}, self)
 
